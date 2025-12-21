@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import postRoutes from "./routes/posts";
 import likeRoutes from "./routes/likes";
 import commentRoutes from "./routes/comments";
+import userRoutes from "./routes/users";
 
 const app = express();
 
@@ -26,9 +27,10 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/posts", postRoutes);
-app.use("/likes", likeRoutes);
-app.use("/comments", commentRoutes);
+app.use("/post", postRoutes);
+app.use("/like", likeRoutes);
+app.use("/comment", commentRoutes);
+app.use("/user", userRoutes)
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Not found" });
