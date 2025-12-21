@@ -25,10 +25,10 @@ app.get("/health", (_req, res) => {
   res.json({ success: true, message: "OK" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/likes", likeRoutes);
-app.use("/api/comments", commentRoutes);
+app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
+app.use("/likes", likeRoutes);
+app.use("/comments", commentRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: "Not found" });
