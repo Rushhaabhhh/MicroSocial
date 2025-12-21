@@ -1,0 +1,41 @@
+import express from "express";
+import cors from "cors";
+import { config } from "./config/env";
+import { connectDB } from "./config/database";
+import { errorHandler } from "./middleware/errorHandler";
+
+import authRoutes from "./routes/auth";
+import postRoutes from "./routes/posts";
+import likeRoutes from "./routes/likes";
+import commentRoutes from "./routes/comments";
+
+const app = express();
+
+app.use(
+  cors({
+    origin: [config.frontendUrl, "http://localhost:19006"],
+    credentials: true
+  })
+);
+app.use(express.json());
+
+connectDB();
+
+app.get("/health", (_req, res) => {
+  res.json({ success: true, message: "OK" });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/likes", likeRoutes);
+app.use("/api/comments", commentRoutes);
+
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Not found" });
+});
+
+app.use(errorHandler);
+
+app.listen(config.port, () => {
+  console.log(`Backend running on http://localhost:${config.port}`);
+});
