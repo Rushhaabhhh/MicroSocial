@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useAuth } from '../../src/context/AuthContext';
 import { postsService } from '../../src/services/posts';
 import { Post, PostResponse } from '../../src/types';
 import { SafeArea } from '../../src/components/SafeArea';
@@ -25,7 +26,9 @@ import {
 } from '../../src/utils/constants';
 
 export default function PostDetailScreen() {
+  const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
+  const { user } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,18 +44,17 @@ export default function PostDetailScreen() {
       setError(null);
 
       if (!postId) {
-        setError("Post not found");
+        setError('Post not found');
         return;
       }
 
-      const response: PostResponse = await postsService.getPostById(postId);
+      const response: PostResponse = await postsService.getPostById(postId as string);
 
       if (response.success && response.data) {
         setPost(response.data);
       }
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.error || "Failed to load post";
+      const errorMessage = err.response?.data?.error || 'Failed to load post';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -61,26 +63,21 @@ export default function PostDetailScreen() {
 
   const handleLike = async () => {
     if (!post) return;
+
     try {
       setLiking(true);
-      if (post.isLiked) {
-        await postsService.unlikePost(post._id);
-      } else {
-        await postsService.likePost(post._id);
-      }
-
-      setPost((prevPost) => {
-        if (!prevPost) return null;
-        return {
-          ...prevPost,
-          isLiked: !prevPost.isLiked,
-          likesCount: prevPost.isLiked
-            ? prevPost.likesCount - 1
-            : prevPost.likesCount + 1,
-        };
+      
+      // Call toggle endpoint
+      const result = await postsService.toggleLike(post._id);
+      
+      // Update local state with server response
+      setPost({
+        ...post,
+        isLiked: result.isLiked,
+        likesCount: result.likeCount,
       });
-    } catch (error) {
-      Alert.alert("Error", "Failed to like post");
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.message || 'Failed to toggle like');
     } finally {
       setLiking(false);
     }
@@ -117,7 +114,6 @@ export default function PostDetailScreen() {
       height: 50,
       borderRadius: 25,
       marginRight: SPACING.md,
-      backgroundColor: COLORS.primary,
     },
     authorInfo: {
       flex: 1,
@@ -144,13 +140,6 @@ export default function PostDetailScreen() {
       fontSize: FONT_SIZES.base,
       color: COLORS.text,
       lineHeight: 24,
-      marginBottom: 0,
-    },
-    image: {
-      width: '100%',
-      height: 400,
-      borderRadius: BORDER_RADIUS.md,
-      backgroundColor: COLORS.surface,
     },
     statsSection: {
       flexDirection: 'row',
@@ -286,7 +275,7 @@ export default function PostDetailScreen() {
                   post.isLiked && styles.actionTextActive,
                 ]}
               >
-                Like
+                {post.isLiked ? 'Unlike' : 'Like'}
               </Text>
             </TouchableOpacity>
 
