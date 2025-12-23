@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useAuth } from '../../src/context/AuthContext';
+import { useLocalSearchParams } from 'expo-router';
 import { postsService } from '../../src/services/posts';
 import { Post, PostResponse } from '../../src/types';
 import { SafeArea } from '../../src/components/SafeArea';
@@ -26,9 +25,7 @@ import {
 } from '../../src/utils/constants';
 
 export default function PostDetailScreen() {
-  const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
-  const { user } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,21 +41,18 @@ export default function PostDetailScreen() {
       setError(null);
 
       if (!postId) {
-        setError('Post not found');
+        setError("Post not found");
         return;
       }
 
       const response: PostResponse = await postsService.getPostById(postId);
 
       if (response.success && response.data) {
-        const postWithLikeStatus = {
-          ...response.data,
-          isLiked: response.data.likes.includes(user?._id || ''),
-        };
-        setPost(postWithLikeStatus);
+        setPost(response.data);
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Failed to load post';
+      const errorMessage =
+        err.response?.data?.error || "Failed to load post";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -67,10 +61,8 @@ export default function PostDetailScreen() {
 
   const handleLike = async () => {
     if (!post) return;
-
     try {
       setLiking(true);
-
       if (post.isLiked) {
         await postsService.unlikePost(post._id);
       } else {
@@ -88,7 +80,7 @@ export default function PostDetailScreen() {
         };
       });
     } catch (error) {
-      Alert.alert('Error', 'Failed to like post');
+      Alert.alert("Error", "Failed to like post");
     } finally {
       setLiking(false);
     }
@@ -152,7 +144,7 @@ export default function PostDetailScreen() {
       fontSize: FONT_SIZES.base,
       color: COLORS.text,
       lineHeight: 24,
-      marginBottom: post?.image ? SPACING.md : 0,
+      marginBottom: 0,
     },
     image: {
       width: '100%',
@@ -257,9 +249,6 @@ export default function PostDetailScreen() {
           {/* Content */}
           <View style={styles.content}>
             <Text style={styles.contentText}>{post.content}</Text>
-            {post.image && (
-              <Image source={{ uri: post.image }} style={styles.image} />
-            )}
           </View>
 
           {/* Stats */}
