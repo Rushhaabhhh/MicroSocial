@@ -16,8 +16,15 @@ export const getUserProfile = async (req: AuthRequest, res: Response) => {
     
     const postCount = await Post.countDocuments({ userId });
     
+    const normalizedUser = {
+      ...user,
+      id: (user._id as any).toString(),
+      _id: undefined,
+      postCount
+    };
+    
     return res.status(200).json(
-      ok({ user: { ...user, postCount } }, 'User profile fetched successfully')
+      ok({ user: normalizedUser }, 'User profile fetched successfully')
     );
   } catch (error: any) {
     return res.status(500).json(fail(500, 'Failed to fetch user profile'));
@@ -57,7 +64,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     return res.status(200).json(
       ok({
         user: {
-          id: user._id,
+          id: user._id.toString(),
           username: user.username,
           email: user.email,
           avatar: user.avatar,
@@ -100,9 +107,15 @@ export const searchUsers = async (req: AuthRequest, res: Response) => {
       ]
     });
     
+    const normalizedUsers = users.map((user: any) => ({
+      ...user,
+      id: user._id.toString(),
+      _id: undefined
+    }));
+    
     return res.status(200).json(
       ok({
-        users,
+        users: normalizedUsers,
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -127,8 +140,14 @@ export const getTrendingUsers = async (req: AuthRequest, res: Response) => {
       .select('-password')
       .lean();
     
+    const normalizedUsers = users.map((user: any) => ({
+      ...user,
+      id: user._id.toString(),
+      _id: undefined
+    }));
+    
     return res.status(200).json(
-      ok({ users }, 'Trending users fetched successfully')
+      ok({ users: normalizedUsers }, 'Trending users fetched successfully')
     );
   } catch (error: any) {
     return res.status(500).json(fail(500, 'Failed to fetch trending users'));

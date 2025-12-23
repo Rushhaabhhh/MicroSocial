@@ -7,36 +7,49 @@ export interface AuthRequest extends Request {
 }
 
 export const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer "))
-    return res.status(401).json(fail(401, "No token"));
+  try {
+    const header = req.headers.authorization;
 
-  const token = header.split(" ")[1];
-  const decoded = verifyToken(token);
-  if (!decoded) return res.status(401).json(fail(401, "Invalid token"));
+    if (!header || !header.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json(fail(401, "Missing or invalid Authorization header"));
+    }
 
-  req.userId = decoded.id;
-  next();
+    // Safer than split; handles extra spaces
+    const token = header.slice(7).trim();
+
+    const decoded = verifyToken(token);
+    if (!decoded || !decoded.id) {
+      return res.status(401).json(fail(401, "Invalid or expired token"));
+    }
+
+    req.userId = decoded.id;
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    return res.status(401).json(fail(401, "Authentication failed"));
+  }
 };
 
 export const authMiddleware = auth;
 
 export const optionalAuth = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
     const header = req.headers.authorization;
-    if (header?.startsWith("Bearer ")) {
-      const token = header.split(" ")[1];
+    if (header && header.startsWith("Bearer ")) {
+      const token = header.slice(7).trim();
       const decoded = verifyToken(token);
-      if (decoded) {
+      if (decoded && decoded.id) {
         req.userId = decoded.id;
       }
     }
     next();
-  } catch (error) {
+  } catch {
     next();
   }
 };
