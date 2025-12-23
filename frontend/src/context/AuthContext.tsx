@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthResponse } from '../types';
+import { User } from '../types';
 import { authService } from '../services/auth';
 import { apiClient } from '../services/api';
-import { storageService } from '../services/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -32,55 +31,57 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const savedToken = await apiClient.getToken();
       if (savedToken) {
         setToken(savedToken);
-        const response = await authService.getCurrentUser();
-        if (response.success && response.data) {
-          setUser(response.data);
+        try {
+          const response = await authService.getCurrentUser();
+          if (response.success && response.data) {
+            setUser(response.data);
+          } else {
+            await apiClient.clearToken();
+            setToken(null);
+          }
+        } catch {
+          await apiClient.clearToken();
+          setToken(null);
         }
       }
-    } catch (error) {
-      console.error('Auth restore failed:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signUp = async (name: string, email: string, username: string, password: string) => {
-    try {
-      const response = await authService.signup(name, email, username, password);
-      if (response.success && response.data) {
-        await apiClient.setToken(response.data.token);
-        setToken(response.data.token);
-        setUser(response.data.user);
-      } else {
-        throw new Error(response.error || 'Signup failed');
-      }
-    } catch (error) {
-      throw error;
+  const signUp = async (
+    name: string,
+    email: string,
+    username: string,
+    password: string
+  ) => {
+    const response = await authService.signup(name, email, username, password);
+    if (response.success && response.data) {
+      await apiClient.setToken(response.data.token);
+      setToken(response.data.token);
+      setUser(response.data.user);
+    } else {
+      throw new Error(response.error || "Signup failed");
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    try {
-      const response = await authService.login(email, password);
-      if (response.success && response.data) {
-        await apiClient.setToken(response.data.token);
-        setToken(response.data.token);
-        setUser(response.data.user);
-      } else {
-        throw new Error(response.error || 'Login failed');
-      }
-    } catch (error) {
-      throw error;
+    const response = await authService.login(email, password);
+    if (response.success && response.data) {
+      await apiClient.setToken(response.data.token);
+      setToken(response.data.token);
+      setUser(response.data.user);
+    } else {
+      throw new Error(response.error || "Login failed");
     }
   };
 
   const signOut = async () => {
     try {
       await authService.logout();
+    } finally {
       setUser(null);
       setToken(null);
-    } catch (error) {
-      console.error('Logout failed:', error);
     }
   };
 
@@ -90,8 +91,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (response.success && response.data) {
         setUser(response.data);
       }
-    } catch (error) {
-      console.error('Check auth failed:', error);
+    } catch {
+      // Silently fail
     }
   };
 

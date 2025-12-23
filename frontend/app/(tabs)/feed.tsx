@@ -156,7 +156,7 @@ export default function FeedScreen() {
           <PostCard
             post={item}
             onPress={() => router.push({
-              pathname: '/(app)/post-detail',
+              pathname: '/post-detail',
               params: { postId: item._id },
             })}
             onLike={handleLike}

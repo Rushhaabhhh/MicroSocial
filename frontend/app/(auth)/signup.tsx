@@ -81,7 +81,7 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signUp(name, email, username, password);
-      router.replace('/(app)/feed');
+      router.replace('/feed');
     } catch (error: any) {
       Alert.alert('Signup Error', error.message || 'Failed to create account');
       setErrors({});

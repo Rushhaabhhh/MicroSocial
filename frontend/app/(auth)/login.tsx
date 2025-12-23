@@ -56,7 +56,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signIn(email, password);
-      router.replace('/(app)/feed');
+      router.replace('/feed');
     } catch (error: any) {
       Alert.alert('Login Error', error.message || 'Failed to login');
       setErrors({});

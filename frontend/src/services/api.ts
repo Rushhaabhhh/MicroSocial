@@ -1,7 +1,7 @@
-import axios, { AxiosInstance } from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import axios, { AxiosInstance, AxiosError } from "axios";
+import * as SecureStore from "expo-secure-store";
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:4000";
 
 class APIClient {
   private client: AxiosInstance;
@@ -12,7 +12,7 @@ class APIClient {
       baseURL: API_URL,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -24,6 +24,7 @@ class APIClient {
       async (config) => {
         const token = await this.getToken();
         if (token) {
+          config.headers = config.headers || {};
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
@@ -33,7 +34,7 @@ class APIClient {
 
     this.client.interceptors.response.use(
       (response) => response,
-      async (error) => {
+      async (error: AxiosError) => {
         if (error.response?.status === 401) {
           await this.clearToken();
         }
@@ -45,19 +46,19 @@ class APIClient {
   async setToken(token: string) {
     this.token = token;
     try {
-      await SecureStore.setItemAsync('authToken', token);
-    } catch (error) {
-      console.warn('Failed to save token to secure store:', error);
+      await SecureStore.setItemAsync("authToken", token);
+    } catch {
+      // Silently fail - keep in memory
     }
   }
 
   async getToken(): Promise<string | null> {
     if (this.token) return this.token;
+    
     try {
-      this.token = await SecureStore.getItemAsync('authToken');
+      this.token = await SecureStore.getItemAsync("authToken");
       return this.token;
-    } catch (error) {
-      console.warn('Failed to retrieve token from secure store:', error);
+    } catch {
       return null;
     }
   }
@@ -65,9 +66,9 @@ class APIClient {
   async clearToken() {
     this.token = null;
     try {
-      await SecureStore.deleteItemAsync('authToken');
-    } catch (error) {
-      console.warn('Failed to clear token from secure store:', error);
+      await SecureStore.deleteItemAsync("authToken");
+    } catch {
+      // Silently fail
     }
   }
 
@@ -91,8 +92,8 @@ class APIClient {
     return this.client.post<T>(url, formData, {
       ...config,
       headers: {
-        'Content-Type': 'multipart/form-data',
-        ...config?.headers,
+        "Content-Type": "multipart/form-data",
+        ...(config?.headers || {}),
       },
     });
   }

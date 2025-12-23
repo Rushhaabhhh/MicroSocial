@@ -78,7 +78,7 @@ export default function CreatePostScreen() {
       } as any);
 
       const response = await postsService.uploadImage(formData);
-      return response.url;
+      return response?.url || null;
     } catch (error) {
       Alert.alert('Error', 'Failed to upload image');
       return null;
@@ -104,7 +104,7 @@ export default function CreatePostScreen() {
         }
       }
 
-      await postsService.createPost(content, imageUrl);
+      await postsService.createPost(content);
       Alert.alert('Success', 'Post created successfully!');
       setContent('');
       setSelectedImage(null);

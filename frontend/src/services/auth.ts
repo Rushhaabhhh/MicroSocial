@@ -1,5 +1,5 @@
-import { apiClient } from './api';
-import { AuthResponse, User } from '../types';
+import { apiClient } from "./api";
+import { AuthResponse, User } from "../types";
 
 export const authService = {
   async signup(
@@ -8,17 +8,16 @@ export const authService = {
     username: string,
     password: string
   ): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/signup', {
-      name,
-      email,
+    const response = await apiClient.post<AuthResponse>("/auth/signup", {
       username,
+      email,
       password,
     });
     return response.data;
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', {
+    const response = await apiClient.post<AuthResponse>("/auth/login", {
       email,
       password,
     });
@@ -26,19 +25,12 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<{ success: boolean; data: User }> {
-    const response = await apiClient.get<{ success: boolean; data: User }>(
-      '/auth/me'
-    );
+    const response = await apiClient.get<{ success: boolean; data: User }>("/auth/me");
     return response.data;
   },
 
-  async updateProfile(
-    data: Partial<User>
-  ): Promise<{ success: boolean; data: User }> {
-    const response = await apiClient.put<{ success: boolean; data: User }>(
-      '/users/profile',
-      data
-    );
+  async updateProfile(data: Partial<User>): Promise<{ success: boolean; data: User }> {
+    const response = await apiClient.put<{ success: boolean; data: User }>("/users/profile", data);
     return response.data;
   },
 
