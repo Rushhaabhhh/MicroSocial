@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [config.frontendUrl, "http://localhost:19006"],
+    origin: [config.frontendUrl, "http://localhost:8081"],
     credentials: true
   })
 );
@@ -27,7 +27,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/post", postRoutes);
+app.use("/posts", postRoutes);
 app.use("/like", likeRoutes);
 app.use("/comment", commentRoutes);
 app.use("/user", userRoutes)

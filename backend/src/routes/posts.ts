@@ -4,8 +4,8 @@ import { createPost, getFeed, getUserPosts } from "../controllers/postController
 
 const router = Router();
 
-router.get("/", auth, getFeed);
-router.post("/", auth, createPost);
+router.get("/feed", auth, getFeed);
+router.post("/upload", auth, createPost);
 router.get("/user/:userId", auth, getUserPosts);
 
 export default router;

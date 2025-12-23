@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useRouter, Redirect } from 'expo-router';
+import { Redirect } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 import { Loading } from '../src/components/Loading';
 
@@ -12,7 +11,7 @@ export default function Index() {
 
   return (
     <Redirect 
-      href={isSignedIn ? '/(tabs)/feed' : '/(auth)/login'} 
+      href={isSignedIn ? '/feed' : '/login'} 
     />
   );
 }
