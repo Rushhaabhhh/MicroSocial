@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { FeedResponse, PostResponse } from '../types';
+import { AddCommentResponse, CommentResponse, FeedResponse, PostResponse } from '../types';
 
 export const postsService = {
   // Feed - paginated posts
@@ -51,6 +51,24 @@ export const postsService = {
     const response = await apiClient.get<FeedResponse>(`/posts/user/${userId}`, {
       params: { page, limit },
     });
+    return response.data;
+  },
+  async getComments(postId: string, page: number = 1, limit: number = 10): Promise<CommentResponse> {
+    const response = await apiClient.get<CommentResponse>(`/comments/${postId}`, {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
+  async addComment(postId: string, content: string): Promise<AddCommentResponse> {
+    const response = await apiClient.post<AddCommentResponse>(`/comments/${postId}`, {
+      content: content.trim(),
+    });
+    return response.data;
+  },
+
+  async deleteComment(commentId: string): Promise<{ success: boolean }> {
+    const response = await apiClient.delete<{ success: boolean }>(`/comments/${commentId}`);
     return response.data;
   },
 };

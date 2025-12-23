@@ -24,6 +24,7 @@ import {
   SPACING,
   BORDER_RADIUS,
 } from '../../src/utils/constants';
+import  CommentsSection from '../../src/components/comment';
 
 export default function PostDetailScreen() {
   const router = useRouter();
@@ -289,6 +290,16 @@ export default function PostDetailScreen() {
               <Text style={styles.actionText}>Share</Text>
             </TouchableOpacity>
           </View>
+
+          {post && (
+            <CommentsSection
+              postId={post._id}
+              postCommentCount={post.commentsCount}
+              onCommentCountChange={(count: any) =>
+                setPost(prev => prev ? { ...prev, commentsCount: count } : null)
+              }
+            />
+          )}
         </View>
       </ScrollView>
     </SafeArea>

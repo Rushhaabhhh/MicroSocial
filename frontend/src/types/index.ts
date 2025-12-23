@@ -81,3 +81,26 @@ export interface ErrorResponse {
   error: string;
   message: string;
 }
+
+export interface CommentResponse {
+  success: boolean;
+  data: {
+    data: Comment[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
+  message: string;
+}
+
+export interface AddCommentResponse {
+  success: boolean;
+  data: {
+    comment: Comment;
+    postCommentCount: number;
+  };
+  message: string;
+}
